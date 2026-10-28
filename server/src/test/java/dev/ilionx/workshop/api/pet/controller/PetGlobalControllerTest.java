@@ -67,6 +67,63 @@ class PetGlobalControllerTest extends IntegrationTest {
             .andExpect(jsonPath("$", hasSize(0)));
     }
 
+    @Test
+    @DisplayName("Should return only pets whose names contain the search term")
+    void shouldFilterPetsByNameSubstring() throws Exception {
+        final Owner owner = aSavedOwner();
+        final Pet buddy = aSavedPetWithName(owner, "Buddy");
+        final Pet superBuddy = aSavedPetWithName(owner, "SuperBuddyJunior");
+        aSavedPetWithName(owner, "Leo");
+
+        mockMvc.perform(get(PETS).param("name", "Buddy"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].id", containsInAnyOrder(buddy.getId(), superBuddy.getId())));
+    }
+
+    @Test
+    @DisplayName("Should search pet names case-insensitively")
+    void shouldFilterPetsByNameIgnoringCase() throws Exception {
+        final Owner owner = aSavedOwner();
+        final Pet buddy = aSavedPetWithName(owner, "Buddy");
+        aSavedPetWithName(owner, "Leo");
+
+        mockMvc.perform(get(PETS).param("name", "buddy"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(equalTo(buddy.getId()))));
+    }
+
+    @Test
+    @DisplayName("Should return all pets when the name parameter is empty")
+    void shouldReturnAllPetsWhenNameIsEmpty() throws Exception {
+        final Owner owner = aSavedOwner();
+        final Pet buddy = aSavedPetWithName(owner, "Buddy");
+        final Pet leo = aSavedPetWithName(owner, "Leo");
+
+        mockMvc.perform(get(PETS).param("name", ""))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].id", containsInAnyOrder(buddy.getId(), leo.getId())));
+    }
+
+    @Test
+    @DisplayName("Should return an empty list when no pet names match")
+    void shouldReturnEmptyListWhenNoPetNamesMatch() throws Exception {
+        final Owner owner = aSavedOwner();
+        aSavedPetWithName(owner, "Buddy");
+
+        mockMvc.perform(get(PETS).param("name", "NoMatch"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    private Pet aSavedPetWithName(final Owner owner, final String name) {
+        final Pet pet = aSavedPet(owner);
+        pet.setName(name);
+        return petRepository.save(pet);
+    }
+
     // ========================= GET BY ID =========================
     @Test
     @DisplayName("Should return pet when valid pet ID exists")
