@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Users, Stethoscope, Calendar, Home, Menu, X } from 'lucide-svelte';
+	import { Users, Stethoscope, Calendar, Home, Menu, X, PawPrint } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	let mobileMenuOpen = $state(false);
@@ -8,6 +8,7 @@
 	const navItems = [
 		{ href: '/', label: 'Home', icon: Home },
 		{ href: '/owners', label: 'Owners', icon: Users },
+		{ href: '/pets', label: 'Pets', icon: PawPrint },
 		{ href: '/vets', label: 'Veterinarians', icon: Stethoscope },
 		{ href: '/visits', label: 'Visits', icon: Calendar }
 	];
@@ -37,7 +38,8 @@
 				{#each navItems as item (item.href)}
 					<a
 						href={item.href}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors
+						aria-current={isActive(item.href) ? 'page' : undefined}
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
 							{isActive(item.href)
 								? 'bg-primary/10 text-primary'
 								: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
@@ -72,7 +74,8 @@
 						<a
 							href={item.href}
 							onclick={closeMobileMenu}
-							class="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors
+							aria-current={isActive(item.href) ? 'page' : undefined}
+							class="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
 								{isActive(item.href)
 									? 'bg-primary/10 text-primary'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
