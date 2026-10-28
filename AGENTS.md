@@ -20,3 +20,6 @@ VetHub is a pet-clinic management app for owners, pets, visits and vets, with a 
 
 - `client/src/lib/types/api.d.ts` is generated and tracked; regenerate after server API changes instead of editing it directly. With the server running on port 8080, from `client/` run `bun run download:api` then `bun run generate:api`, followed by `bun run check`. The download creates `server/openapi.json`, which is not ignored or tracked.
 - `bun run sync:api` attempts to start its own server and stops Gradle daemons. Its readiness probe uses `/api/actuator/health`, whereas `application.yml` configures `/api/v1/public/actuator/health`; use the manual sequence above if sync fails. The script also removes any existing `server/openapi.json` before downloading.
+
+## Workflow
+- when a refined story has been implemented move the story from .opencode/refined/ to .opencode/completed/ within the project folder. Also add an entry to .opencode/CHANGELOG.md

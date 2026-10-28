@@ -1,7 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 	<head>
 		<meta charset="utf-8" />
+		<script>
+			// Keep in sync with $lib/theme: this runs before styles and the first paint.
+			try {
+				const theme = localStorage.getItem('vethub.theme');
+				if (theme === 'light' || theme === 'dark' || theme === 'playful') {
+					document.documentElement.dataset.theme = theme;
+				}
+			} catch {
+				// Storage may be unavailable; the root already defaults to Light.
+			}
+		</script>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="VetHub - Veterinary Clinic Management System by ilionx" />
 		<meta name="theme-color" content="#E8003D" />

@@ -6,7 +6,7 @@
 	<div class="container mx-auto px-4 py-6">
 		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
 			<div class="flex items-center gap-3">
-				<img src="/logo-red.png" alt="ilionx" class="h-6 w-auto opacity-70" />
+				<span class="brand-logo"><img src="/logo-red.png" alt="ilionx" class="h-6 w-auto" /></span>
 				<p class="text-sm text-muted-foreground">
 					&copy; {currentYear} ilionx. <span class="font-light italic">experts in eenvoud</span>
 				</p>

@@ -2,6 +2,10 @@
 	import { page } from '$app/stores';
 	import { Users, Stethoscope, Calendar, Home, Menu, X, PawPrint } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
+	import ThemeSelector from './ThemeSelector.svelte';
+	import type { Theme } from '$lib/theme';
+
+	let { theme, onThemeChange }: { theme: Theme; onThemeChange: (theme: Theme) => void } = $props();
 
 	let mobileMenuOpen = $state(false);
 
@@ -27,14 +31,14 @@
 
 <header class="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
 	<div class="container mx-auto px-4">
-		<div class="flex h-16 items-center justify-between">
+		<div class="flex h-16 items-center justify-between gap-2">
 			<!-- Logo -->
-			<a href="/" class="flex items-center gap-2 transition-opacity hover:opacity-80">
-				<img src="/logo-vethub.svg" alt="VetHub" class="h-10 w-auto" />
+			<a href="/" class="brand-logo flex shrink-0 items-center transition-opacity hover:opacity-80">
+				<img src="/logo-vethub.svg" alt="VetHub" class="h-6 w-auto lg:h-10" />
 			</a>
 
 			<!-- Desktop Navigation -->
-			<nav class="hidden md:flex md:items-center md:gap-1">
+			<nav class="hidden lg:flex lg:items-center lg:gap-1">
 				{#each navItems as item (item.href)}
 					<a
 						href={item.href}
@@ -50,25 +54,30 @@
 				{/each}
 			</nav>
 
-			<!-- Mobile Menu Button -->
-			<Button
-				variant="ghost"
-				size="icon"
-				class="md:hidden"
-				onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-				aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-			>
-				{#if mobileMenuOpen}
-					<X class="h-5 w-5" />
-				{:else}
-					<Menu class="h-5 w-5" />
-				{/if}
-			</Button>
+			<div class="flex shrink-0 items-center gap-1">
+				<ThemeSelector {theme} onselect={onThemeChange} />
+				<!-- Mobile Menu Button -->
+				<Button
+					variant="ghost"
+					size="icon"
+					class="lg:hidden"
+					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
+					aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+					aria-expanded={mobileMenuOpen}
+					aria-controls={mobileMenuOpen ? 'mobile-navigation' : undefined}
+				>
+					{#if mobileMenuOpen}
+						<X class="h-5 w-5" />
+					{:else}
+						<Menu class="h-5 w-5" />
+					{/if}
+				</Button>
+			</div>
 		</div>
 
 		<!-- Mobile Navigation -->
 		{#if mobileMenuOpen}
-			<nav class="border-t border-border py-4 md:hidden">
+			<nav id="mobile-navigation" class="border-t border-border py-4 lg:hidden">
 				<div class="flex flex-col gap-1">
 					{#each navItems as item (item.href)}
 						<a
