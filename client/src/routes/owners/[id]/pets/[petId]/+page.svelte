@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getPetForOwner, deletePetForOwner } from '$lib/api/pet/PetController';
-	import type { PetResponse } from '$lib/api/models';
+	import type { PetResponse, VisitSummaryResponse } from '$lib/api/models';
+	import { formatVisitDate, groupVisits, localDateKey } from '$lib/visits/date-status';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -22,19 +23,28 @@
 	let loading = $state(true);
 	let deleteDialogOpen = $state(false);
 	let deleting = $state(false);
+	let today = $state('');
+	let loadSequence = 0;
 
 	const ownerId = $derived(Number($page.params.id));
 	const petId = $derived(Number($page.params.petId));
+	const visits = $derived(groupVisits(pet?.visits ?? [], today));
 
-	async function loadPet() {
+	async function loadPet(ownerId: number, petId: number) {
+		const sequence = ++loadSequence;
 		loading = true;
+		pet = null;
 		try {
-			pet = await getPetForOwner(ownerId, petId);
+			const loadedPet = await getPetForOwner(ownerId, petId);
+			if (sequence !== loadSequence) return;
+			today = localDateKey();
+			pet = loadedPet;
 		} catch (err) {
+			if (sequence !== loadSequence) return;
 			toast.error('Failed to load pet');
 			console.error('Error:', err);
 		} finally {
-			loading = false;
+			if (sequence === loadSequence) loading = false;
 		}
 	}
 
@@ -77,7 +87,7 @@
 	// Load pet on mount and when IDs change
 	$effect(() => {
 		if (ownerId && petId) {
-			loadPet();
+			loadPet(ownerId, petId);
 		}
 	});
 </script>
@@ -144,46 +154,63 @@
 		</Card.Root>
 
 		<!-- Visits Section -->
-		<div class="mb-6 flex items-center justify-between">
-			<h2 class="text-xl font-semibold text-foreground">Visit History</h2>
+		<div class="mb-2 flex flex-wrap items-center justify-between gap-4">
+			<h2 class="text-xl font-semibold text-foreground">Visits</h2>
 			<Button href="/owners/{ownerId}/pets/{petId}/visits/new" class="gap-2">
 				<Plus class="h-4 w-4" />
 				Add Visit
 			</Button>
 		</div>
 
-		{#if !pet.visits?.length}
-			<div class="card p-8 text-center">
-				<Stethoscope class="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-				<p class="text-muted-foreground">No visits recorded for this pet</p>
-				<Button href="/owners/{ownerId}/pets/{petId}/visits/new" class="mt-4 gap-2">
-					<Plus class="h-4 w-4" />
-					Record First Visit
-				</Button>
-			</div>
-		{:else}
-			<div class="space-y-4">
-				{#each pet.visits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) as visit (visit.id)}
-					<Card.Root>
-						<Card.Content class="pt-6">
-							<div class="flex items-start justify-between">
-								<div class="flex items-start gap-4">
-									<div class="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
-										<Stethoscope class="h-5 w-5 text-success" />
-									</div>
-									<div>
-										<p class="font-medium text-foreground">{visit.description}</p>
-										<p class="text-sm text-muted-foreground">{formatDate(visit.date)}</p>
-									</div>
-								</div>
-							</div>
-						</Card.Content>
-					</Card.Root>
-				{/each}
-			</div>
-		{/if}
+		<p class="mb-6 text-sm text-muted-foreground">Labels are based on visit dates, not completion status.</p>
+
+		<section aria-labelledby="upcoming-visits-heading" class="mb-8">
+			<h3 id="upcoming-visits-heading" class="mb-4 text-lg font-semibold">Today &amp; Upcoming</h3>
+			{#if visits.todayAndUpcoming.length}
+				<div class="space-y-4">
+					{#each visits.todayAndUpcoming as visit (visit.id)}
+						{@render visitCard(visit, visit.date === today ? 'Today' : 'Upcoming')}
+					{/each}
+				</div>
+			{:else}
+				<div class="card p-8 text-center text-muted-foreground">No visits scheduled for today or upcoming dates</div>
+			{/if}
+		</section>
+
+		<section aria-labelledby="past-visits-heading">
+			<h3 id="past-visits-heading" class="mb-4 text-lg font-semibold">Past Visits</h3>
+			{#if visits.past.length}
+				<div class="space-y-4">
+					{#each visits.past as visit (visit.id)}
+						{@render visitCard(visit, 'Past')}
+					{/each}
+				</div>
+			{:else}
+				<div class="card p-8 text-center text-muted-foreground">No past visits recorded for this pet</div>
+			{/if}
+		</section>
 	{/if}
 </div>
+
+{#snippet visitCard(visit: VisitSummaryResponse, status: string)}
+	<Card.Root>
+		<Card.Content class="pt-6">
+			<div class="flex items-start gap-4">
+				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10">
+					<Stethoscope class="h-5 w-5 text-success" />
+				</div>
+				<div class="min-w-0 flex-1">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<p class="text-sm text-muted-foreground">{formatVisitDate(visit.date)}</p>
+						<Badge variant="secondary">{status}</Badge>
+					</div>
+					<p class="mt-1 break-words font-medium text-foreground">{visit.description}</p>
+					<p class="mt-1 break-words text-sm text-muted-foreground">Vet: {visit.vetName ?? 'Not recorded'}</p>
+				</div>
+			</div>
+		</Card.Content>
+	</Card.Root>
+{/snippet}
 
 <!-- Delete Confirmation Dialog -->
 <Dialog.Root bind:open={deleteDialogOpen}>

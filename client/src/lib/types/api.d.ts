@@ -613,6 +613,8 @@ export interface components {
              * @example 1
              */
             petId: number;
+            /** @description Current veterinarian name, or null if not recorded */
+            vetName: string | null;
         };
         /** @description Request to update an existing vet */
         UpdateVetRequest: {
@@ -761,6 +763,8 @@ export interface components {
              * @example Rabies shot
              */
             description: string;
+            /** @description Current veterinarian name, or null if not recorded */
+            vetName: string | null;
         };
         /** @description Request to update an existing pet type */
         UpdatePetTypeRequest: {
@@ -878,6 +882,12 @@ export interface components {
              * @example 1
              */
             petId?: number;
+            /**
+             * Format: int32
+             * @description Optional ID of the veterinarian
+             * @example 1
+             */
+            vetId?: number | null;
         };
         /** @description Request to create a new vet */
         CreateVetRequest: {
@@ -1502,6 +1512,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponseResource"];
+                };
+            };
+            /** @description Veterinarian is referenced by visits */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiErrorResponseResource"];
                 };
             };
             /** @description Rate Limit Exceeded */

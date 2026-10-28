@@ -37,4 +37,14 @@ public class CreateVisitRequest {
     )
     private Integer petId;
 
+    @Schema(
+        description = "Optional ID of the veterinarian",
+        example = "1",
+        types = {
+            "integer",
+            "null"
+        }
+    )
+    private Integer vetId;
+
 }

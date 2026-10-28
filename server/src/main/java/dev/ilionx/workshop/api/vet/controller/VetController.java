@@ -6,7 +6,11 @@ import dev.ilionx.workshop.api.vet.model.request.CreateVetRequest;
 import dev.ilionx.workshop.api.vet.model.request.UpdateVetRequest;
 import dev.ilionx.workshop.api.vet.model.response.VetResponse;
 import dev.ilionx.workshop.api.vet.service.VetService;
+import io.github.jframe.exception.resource.ApiErrorResponseResource;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -98,6 +102,11 @@ public class VetController {
     @Operation(
         summary = "Delete vet",
         description = "Deletes a veterinarian by their unique identifier"
+    )
+    @ApiResponse(
+        responseCode = "409",
+        description = "Veterinarian is referenced by visits",
+        content = @Content(schema = @Schema(implementation = ApiErrorResponseResource.class))
     )
     @DeleteMapping(path = VET_BY_ID)
     public ResponseEntity<Void> deleteVet(@PathVariable final Integer id) {

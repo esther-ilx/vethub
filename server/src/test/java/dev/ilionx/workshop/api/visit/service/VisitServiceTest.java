@@ -2,6 +2,7 @@ package dev.ilionx.workshop.api.visit.service;
 
 import dev.ilionx.workshop.api.pet.model.Pet;
 import dev.ilionx.workshop.api.pet.repository.PetRepository;
+import dev.ilionx.workshop.api.vet.repository.VetRepository;
 import dev.ilionx.workshop.api.visit.model.Visit;
 import dev.ilionx.workshop.api.visit.model.request.CreateVisitRequest;
 import dev.ilionx.workshop.api.visit.model.request.UpdateVisitRequest;
@@ -48,7 +49,7 @@ class VisitServiceTest extends UnitTest {
     void setUp() {
         petRepository = mock(PetRepository.class);
         visitRepository = mock(VisitRepository.class);
-        visitService = new VisitService(petRepository, visitRepository);
+        visitService = new VisitService(petRepository, visitRepository, mock(VetRepository.class));
     }
 
     @Test

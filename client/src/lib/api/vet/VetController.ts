@@ -15,8 +15,8 @@ import type {
  * Get all vets
  */
 export async function getVets(): Promise<VetResponse[]> {
-	const { data, error } = await client.GET('/v1/vets');
-	if (error) throw error;
+	const { data, error, response } = await client.GET('/v1/vets');
+	if (!response.ok) throw error ?? new Error('Failed to load veterinarians');
 	return data ?? [];
 }
 
@@ -60,9 +60,12 @@ export async function updateVet(id: number, request: UpdateVetRequest): Promise<
 /**
  * Delete a vet
  */
+export class VetDeletionConflict extends Error {}
+
 export async function deleteVet(id: number): Promise<void> {
-	const { error } = await client.DELETE('/v1/vets/{id}', {
+	const { error, response } = await client.DELETE('/v1/vets/{id}', {
 		params: { path: { id } }
 	});
-	if (error) throw error;
+	if (response.status === 409) throw new VetDeletionConflict();
+	if (!response.ok) throw error ?? new Error('Failed to delete veterinarian');
 }

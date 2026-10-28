@@ -6,6 +6,7 @@ import dev.ilionx.workshop.api.vet.model.request.CreateVetRequest;
 import dev.ilionx.workshop.api.vet.model.request.UpdateVetRequest;
 import dev.ilionx.workshop.api.vet.repository.SpecialtyRepository;
 import dev.ilionx.workshop.api.vet.repository.VetRepository;
+import dev.ilionx.workshop.api.visit.repository.VisitRepository;
 import dev.ilionx.workshop.support.UnitTest;
 import io.github.jframe.exception.core.DataNotFoundException;
 
@@ -51,7 +52,7 @@ class VetServiceTest extends UnitTest {
     void setUp() {
         vetRepository = mock(VetRepository.class);
         specialtyRepository = mock(SpecialtyRepository.class);
-        vetService = new VetService(vetRepository, specialtyRepository);
+        vetService = new VetService(vetRepository, specialtyRepository, mock(VisitRepository.class));
 
         vetWithoutSpecialties = aValidVet();
 
@@ -258,21 +259,21 @@ class VetServiceTest extends UnitTest {
     void shouldDeleteVetWhenValidIdExists() {
         // Given: A vet with valid ID exists in the repository
         final Vet existingVet = aValidVet();
-        given(vetRepository.findById(VALID_VET_ID)).willReturn(Optional.of(existingVet));
+        given(vetRepository.findLockedById(VALID_VET_ID)).willReturn(Optional.of(existingVet));
 
         // When: Deleting the vet
         vetService.delete(VALID_VET_ID);
 
         // Then: The vet should be deleted from the repository
-        verify(vetRepository).findById(VALID_VET_ID);
-        verify(vetRepository).deleteById(VALID_VET_ID);
+        verify(vetRepository).findLockedById(VALID_VET_ID);
+        verify(vetRepository).delete(existingVet);
     }
 
     @Test
     @DisplayName("Should throw DataNotFoundException when deleting non-existent vet")
     void shouldThrowDataNotFoundExceptionWhenDeletingNonExistentVet() {
         // Given: No vet exists with the given ID
-        given(vetRepository.findById(NON_EXISTENT_VET_ID)).willReturn(Optional.empty());
+        given(vetRepository.findLockedById(NON_EXISTENT_VET_ID)).willReturn(Optional.empty());
 
         // When & Then: Deleting non-existent vet should throw DataNotFoundException
         final DataNotFoundException exception = assertThrows(

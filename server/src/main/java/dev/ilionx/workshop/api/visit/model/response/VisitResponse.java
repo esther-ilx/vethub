@@ -45,4 +45,14 @@ public class VisitResponse {
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     private Integer petId;
+
+    @Schema(
+        description = "Current veterinarian name, or null if not recorded",
+        types = {
+            "string",
+            "null"
+        },
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
+    private String vetName;
 }

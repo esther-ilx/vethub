@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet id="202610281200-visit-vet" author="vethub">
+        <addColumn tableName="visits">
+            <column name="vet_id" type="integer"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="visits" baseColumnNames="vet_id"
+                                 referencedTableName="vets" referencedColumnNames="id"
+                                 constraintName="fk_visits_vet"/>
+        <createIndex tableName="visits" indexName="idx_visits_vet_id">
+            <column name="vet_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

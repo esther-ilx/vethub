@@ -6,12 +6,15 @@ import dev.ilionx.workshop.api.vet.model.request.CreateVetRequest;
 import dev.ilionx.workshop.api.vet.model.request.UpdateVetRequest;
 import dev.ilionx.workshop.api.vet.repository.SpecialtyRepository;
 import dev.ilionx.workshop.api.vet.repository.VetRepository;
+import dev.ilionx.workshop.api.visit.repository.VisitRepository;
+import dev.ilionx.workshop.common.exception.VetReferencedException;
 import io.github.jframe.exception.core.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class VetService {
 
     private final VetRepository vetRepository;
     private final SpecialtyRepository specialtyRepository;
+    private final VisitRepository visitRepository;
 
     /**
      * Retrieves all veterinarians.
@@ -93,7 +97,19 @@ public class VetService {
      */
     @Transactional
     public void delete(final Integer id) {
-        findById(id);
-        vetRepository.deleteById(id);
+        final Vet vet = vetRepository.findLockedById(id)
+            .orElseThrow(() -> new DataNotFoundException(VET_NOT_FOUND));
+        if (visitRepository.existsByVetId(id)) {
+            throw new VetReferencedException();
+        }
+        try {
+            vetRepository.delete(vet);
+            vetRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            if (exception.getMostSpecificCause().getMessage().toLowerCase(java.util.Locale.ROOT).contains("fk_visits_vet")) {
+                throw new VetReferencedException();
+            }
+            throw exception;
+        }
     }
 }

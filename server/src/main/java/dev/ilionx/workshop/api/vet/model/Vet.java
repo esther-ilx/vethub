@@ -43,7 +43,7 @@ public class Vet {
     )
     private String lastName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "vet_specialties",
         joinColumns = @JoinColumn(name = "vet_id"),

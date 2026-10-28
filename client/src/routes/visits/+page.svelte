@@ -85,6 +85,7 @@
 					<Table.Row>
 						<Table.Head>Date</Table.Head>
 						<Table.Head>Description</Table.Head>
+						<Table.Head>Vet</Table.Head>
 						<Table.Head>Pet ID</Table.Head>
 						<Table.Head class="w-[100px]">Actions</Table.Head>
 					</Table.Row>
@@ -96,6 +97,7 @@
 								{new Date(visit.date).toLocaleDateString()}
 							</Table.Cell>
 							<Table.Cell>{visit.description}</Table.Cell>
+							<Table.Cell class="whitespace-normal break-words">{visit.vetName ?? 'Not recorded'}</Table.Cell>
 							<Table.Cell>
 								<span class="text-muted-foreground">Pet #{visit.petId}</span>
 							</Table.Cell>
@@ -107,7 +109,7 @@
 						</Table.Row>
 					{:else}
 						<Table.Row>
-							<Table.Cell colspan={4} class="text-center text-muted-foreground py-8">
+							<Table.Cell colspan={5} class="text-center text-muted-foreground py-8">
 								No visits match your search
 							</Table.Cell>
 						</Table.Row>

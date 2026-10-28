@@ -2,6 +2,7 @@ package dev.ilionx.workshop.api.visit.service;
 
 import dev.ilionx.workshop.api.pet.model.Pet;
 import dev.ilionx.workshop.api.pet.repository.PetRepository;
+import dev.ilionx.workshop.api.vet.repository.VetRepository;
 import dev.ilionx.workshop.api.visit.model.Visit;
 import dev.ilionx.workshop.api.visit.model.request.CreateVisitRequest;
 import dev.ilionx.workshop.api.visit.model.request.UpdateVisitRequest;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static dev.ilionx.workshop.common.exception.ApiErrorCode.PET_NOT_FOUND;
+import static dev.ilionx.workshop.common.exception.ApiErrorCode.VET_NOT_FOUND;
 import static dev.ilionx.workshop.common.exception.ApiErrorCode.VISIT_NOT_FOUND;
 
 /**
@@ -26,6 +28,7 @@ public class VisitService {
 
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
+    private final VetRepository vetRepository;
 
     /**
      * Finds all visits for a specific pet.
@@ -56,6 +59,12 @@ public class VisitService {
         visit.setDate(request.getDate());
         visit.setDescription(request.getDescription());
         visit.setPet(pet);
+        if (request.getVetId() != null) {
+            visit.setVet(
+                vetRepository.findLockedById(request.getVetId())
+                    .orElseThrow(() -> new DataNotFoundException(VET_NOT_FOUND))
+            );
+        }
 
         return visitRepository.save(visit);
     }

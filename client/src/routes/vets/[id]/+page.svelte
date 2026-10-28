@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { getVetById, deleteVet } from '$lib/api/vet/VetController';
+	import { getVetById, deleteVet, VetDeletionConflict } from '$lib/api/vet/VetController';
 	import type { VetResponse } from '$lib/api/models';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
@@ -36,7 +36,9 @@
 			toast.success('Veterinarian deleted successfully');
 			goto('/vets');
 		} catch (err) {
-			toast.error('Failed to delete veterinarian');
+			toast.error(err instanceof VetDeletionConflict
+				? 'Cannot delete veterinarian because they are referenced by visits.'
+				: 'Failed to delete veterinarian');
 			console.error('Error:', err);
 		} finally {
 			deleting = false;

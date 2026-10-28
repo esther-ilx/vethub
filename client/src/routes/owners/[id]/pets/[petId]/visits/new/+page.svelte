@@ -2,6 +2,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { createVisitForPet } from '$lib/api/visit/VisitController';
+	import { getVets } from '$lib/api/vet/VetController';
+	import type { VetResponse } from '$lib/api/models';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -15,6 +17,21 @@
 	let visitDate = $state(new Date().toISOString().split('T')[0]);
 	let description = $state('');
 	let submitting = $state(false);
+	let vets = $state<VetResponse[]>([]);
+	let vetId = $state('');
+	let vetsLoading = $state(true);
+	let vetsError = $state(false);
+
+	$effect(() => {
+		getVets().then((result) => {
+			vets = result;
+		}).catch((error) => {
+			vetsError = true;
+			console.error('Error loading veterinarians:', error);
+		}).finally(() => {
+			vetsLoading = false;
+		});
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -23,7 +40,8 @@
 		try {
 			await createVisitForPet(ownerId, petId, {
 				date: visitDate,
-				description: description.trim()
+				description: description.trim(),
+				vetId: vetId ? Number(vetId) : null
 			});
 			toast.success('Visit recorded successfully');
 			goto(`/owners/${ownerId}/pets/${petId}`);
@@ -75,6 +93,19 @@
 					required
 					disabled={submitting}
 				/>
+			</div>
+
+			<div class="space-y-2">
+				<Label for="vet">Vet (optional)</Label>
+				<select id="vet" bind:value={vetId} disabled={submitting} aria-describedby={vetsError ? 'vet-error' : undefined}
+					class="border-input bg-background w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50">
+					<option value="">Not recorded</option>
+					{#each vets as vet (vet.id)}
+						<option value={String(vet.id)}>{vet.firstName} {vet.lastName}</option>
+					{/each}
+				</select>
+				{#if vetsLoading}<p class="text-sm text-muted-foreground">Loading veterinarians...</p>{/if}
+				{#if vetsError}<p id="vet-error" role="alert" class="text-sm text-destructive">Could not load veterinarians. You can still record a visit without a vet.</p>{/if}
 			</div>
 
 			<div class="flex justify-end gap-3">

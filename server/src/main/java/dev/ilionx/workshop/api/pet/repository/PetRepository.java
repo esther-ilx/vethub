@@ -3,7 +3,9 @@ package dev.ilionx.workshop.api.pet.repository;
 import dev.ilionx.workshop.api.pet.model.Pet;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +21,13 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
      * @param ownerId the owner's ID
      * @return list of pets for the given owner
      */
+    @EntityGraph(
+        attributePaths = {
+            "visits",
+            "visits.vet"
+        },
+        type = EntityGraph.EntityGraphType.LOAD
+    )
     List<Pet> findByOwnerId(Integer ownerId);
 
     /**
@@ -27,5 +36,32 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
      * @param name the name substring to search for
      * @return list of matching pets
      */
+    @EntityGraph(
+        attributePaths = {
+            "visits",
+            "visits.vet"
+        },
+        type = EntityGraph.EntityGraphType.LOAD
+    )
     List<Pet> findByNameContainingIgnoreCase(String name);
+
+    @Override
+    @EntityGraph(
+        attributePaths = {
+            "visits",
+            "visits.vet"
+        },
+        type = EntityGraph.EntityGraphType.LOAD
+    )
+    List<Pet> findAll();
+
+    @Override
+    @EntityGraph(
+        attributePaths = {
+            "visits",
+            "visits.vet"
+        },
+        type = EntityGraph.EntityGraphType.LOAD
+    )
+    Optional<Pet> findById(Integer id);
 }

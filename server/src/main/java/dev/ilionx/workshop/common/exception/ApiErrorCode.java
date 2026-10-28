@@ -41,6 +41,10 @@ public enum ApiErrorCode implements ApiError {
     VISIT_NOT_FOUND(
         "ERR-0007",
         "The requested visit does not exist."
+    ),
+    VET_REFERENCED_BY_VISITS(
+        "ERR-0008",
+        "Cannot delete veterinarian because they are referenced by visits."
     );
 
     /* The error code for this reason. */

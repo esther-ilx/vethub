@@ -1,6 +1,7 @@
 package dev.ilionx.workshop.api.visit.model;
 
 import dev.ilionx.workshop.api.pet.model.Pet;
+import dev.ilionx.workshop.api.vet.model.Vet;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -46,5 +48,9 @@ public class Visit {
         nullable = false
     )
     private Pet pet;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
 
 }
